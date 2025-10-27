@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Management Dashboard - Owner Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* New order flash animation */
+        @keyframes newOrderFlash {
+            0% { background-color: rgba(255, 255, 255, 0.1); }
+            50% { background-color: rgba(76, 175, 80, 0.3); }
+            100% { background-color: rgba(255, 255, 255, 0.1); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-content {
+            display: grid;
+            gap: 30px;
+        }
+
+        .notifications-section,
+        .orders-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            color: #333;
+        }
+
+        /* Notifications Styles */
+        .notifications {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notification {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .notification:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification.unread {
+            border-left-color: #2196f3;
+        }
+
+        .notification-info {
+            flex: 1;
+        }
+
+        .notification-message {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .notification-time {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .notification-action {
+            margin-left: 10px;
+        }
+
+        .view-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .no-notifications,
+        .no-orders {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tab:hover {
+            background: #f3f4f6;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Orders List */
+        .orders-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .order-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .order-id {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #667eea;
+        }
+
+        .order-status {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-preparing {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-ready {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .status-completed {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .order-items {
+            margin-bottom: 15px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+
+        .item-quantity {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .order-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .order-date {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .accept-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .accept-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .update-btn {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .update-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .complete-btn {
+            background: #6b7280;
+            color: white;
+        }
+
+        .complete-btn:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+
+        /* Stats Cards */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .filter-tabs {
+                justify-content: center;
+            }
+
+            .order-actions {
+                justify-content: center;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>🏨 Hotel Management Dashboard</h1>
+                    <p class="subtitle">Manage Orders & Track Status - Real-time Updates</p>
+                </div>
+                <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            <!-- Stats Section -->
+            <div class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-number" id="total-orders">0</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-number" id="pending-orders">0</div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👨‍🍳</div>
+                    <div class="stat-number" id="preparing-orders">0</div>
+                    <div class="stat-label">Preparing</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number" id="completed-orders">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="notifications-section">
+                <h2>🔔 Recent Notifications</h2>
+                <div class="notifications" id="notifications">
+                    <p class="no-notifications">No new notifications</p>
+                </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div class="orders-section">
+                <h2>📋 All Orders</h2>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-status="all">All Orders</button>
+                    <button class="filter-tab" data-status="pending">Pending</button>
+                    <button class="filter-tab" data-status="preparing">Preparing</button>
+                    <button class="filter-tab" data-status="ready">Ready</button>
+                    <button class="filter-tab" data-status="completed">Completed</button>
+                </div>
+                <div class="orders-list" id="orders-list">
+                    <p class="no-orders">No orders yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        function checkAuth() {
+            const isLoggedIn = localStorage.getItem('ownerLoggedIn');
+            if (isLoggedIn !== 'true') {
+                window.location.href = 'owner-login.html';
+            }
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('ownerLoggedIn');
+                localStorage.removeItem('ownerEmail');
+                window.location.href = 'owner-login.html';
+            }
+        }
+
+        // Initialize owner dashboard
+        function init() {
+            checkAuth();
+            
+            // Request notification permission
+            requestNotificationPermission();
+            
+            displayNotifications();
+            displayOrders();
+            updateStats();
+            
+            // Auto-refresh every 3 seconds
+            setInterval(() => {
+                displayNotifications();
+                displayOrders();
+                updateStats();
+            }, 3000);
+            
+            // Real-time updates using storage events
+            setupRealtimeUpdates();
+            
+            setupEventListeners();
+        }
+
+        // Request notification permission
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+
+        // Display notifications
+        function displayNotifications() {
+            const notificationsDiv = document.getElementById('notifications');
+            const notifications = JSON.parse(localStorage.getItem('ownerNotifications') || '[]');
+            
+            notificationsDiv.innerHTML = '';
+            
+            const unreadNotifications = notifications.filter(n => !n.read);
+            
+            if (unreadNotifications.length === 0) {
+                notificationsDiv.innerHTML = '<p class="no-notifications">No new notifications</p>';
+                return;
+            }
+            
+            unreadNotifications.forEach(notification => {
+                const notificationDiv = document.createElement('div');
+                notificationDiv.className = 'notification unread';
+                notificationDiv.innerHTML = `
+                    <div class="notification-info">
+                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-time">${new Date(notification.timestamp).toLocaleString()}</div>
+                    </div>
+                    <div class="notification-action">
+                        <button class="view-btn" onclick="markAsRead('${notification.orderId}')">View Order</button>
+                    </div>
+                `;
+                notificationsDiv.appendChild(notificationDiv);
+            });
+            
+            // Add visual indicator for new orders
+            if (unreadNotifications.length > 0) {
+                showNewOrderIndicator();
+            }
+        }
+
+        // Mark notification as read
+        function markAsRead(orderId) {
+            let notifications = JSON.parse(localStorage.getItem('ownerNotifications') || '[]');
+            notifications = notifications.map(n => {
+                if (n.orderId === orderId) {
+                    n.read = true;
+                }
+                return n;
+            });
+            localStorage.setItem('ownerNotifications', JSON.stringify(notifications));
+            displayNotifications();
+            displayOrders();
+        }
+
+        // Display orders
+        function displayOrders() {
+            const ordersList = document.getElementById('orders-list');
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            
+            ordersList.innerHTML = '';
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p class="no-orders">No orders yet</p>';
+                return;
+            }
+            
+            orders.slice().reverse().forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                
+                let itemsHtml = '';
+                for (const key in order.items) {
+                    const item = order.items[key];
+                    itemsHtml += `
+                        <div class="order-item">
+                            <span>${item.icon} ${item.name}</span>
+                            <span class="item-quantity">${item.quantity}x ₹${item.price * item.quantity}</span>
+                        </div>
+                    `;
+                }
+                
+                orderCard.innerHTML = `
+                    <div class="order-header">
+                        <div class="order-id">${order.id}</div>
+                        <div class="order-status status-${order.status}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</div>
+                    </div>
+                    <div class="order-items">
+                        ${itemsHtml}
+                    </div>
+                    <div class="order-total">Total: ₹${order.total}</div>
+                    <div class="order-date">Ordered at: ${new Date(order.createdAt).toLocaleString()}</div>
+                    <div class="order-actions">
+                        ${order.status === 'pending' ? `
+                            <button class="action-btn accept-btn" onclick="updateOrderStatus('${order.id}', 'preparing')">
+                                Accept & Start Preparing
+                            </button>
+                        ` : ''}
+                        ${order.status === 'preparing' ? `
+                            <button class="action-btn update-btn" onclick="updateOrderStatus('${order.id}', 'ready')">
+                                Mark as Ready
+                            </button>
+                        ` : ''}
+                        ${order.status === 'ready' ? `
+                            <button class="action-btn complete-btn" onclick="updateOrderStatus('${order.id}', 'completed')">
+                                Complete Order
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                
+                ordersList.appendChild(orderCard);
+            });
+        }
+
+        // Update order status
+        function updateOrderStatus(orderId, newStatus) {
+            let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            
+            orders = orders.map(order => {
+                if (order.id === orderId) {
+                    order.status = newStatus;
+                    
+                    // Send notification to customer (stored in localStorage)
+                    const customerNotifications = JSON.parse(localStorage.getItem('customerNotifications') || '[]');
+                    let statusMessage = '';
+                    
+                    switch(newStatus) {
+                        case 'preparing':
+                            statusMessage = 'Your order has been accepted and is being prepared! 👨‍🍳';
+                            break;
+                        case 'ready':
+                            statusMessage = 'Your order is ready! Please collect it. ✅';
+                            break;
+                        case 'completed':
+                            statusMessage = 'Thank you for your order! 🎉 Enjoy your meal!';
+                            break;
+                    }
+                    
+                    customerNotifications.push({
+                        orderId: orderId,
+                        message: statusMessage,
+                        timestamp: new Date().toISOString(),
+                        read: false
+                    });
+                    localStorage.setItem('customerNotifications', JSON.stringify(customerNotifications));
+                }
+                return order;
+            });
+            
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            alert(`Order status updated to: ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`);
+            displayOrders();
+            updateStats();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            
+            const totalOrders = orders.length;
+            const pendingOrders = orders.filter(o => o.status === 'pending').length;
+            const preparingOrders = orders.filter(o => o.status === 'preparing').length;
+            const completedOrders = orders.filter(o => o.status === 'completed').length;
+            
+            document.getElementById('total-orders').textContent = totalOrders;
+            document.getElementById('pending-orders').textContent = pendingOrders;
+            document.getElementById('preparing-orders').textContent = preparingOrders;
+            document.getElementById('completed-orders').textContent = completedOrders;
+        }
+
+        // Setup real-time updates using storage events
+        function setupRealtimeUpdates() {
+            // Listen for storage changes (when orders are added/updated)
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'orders' || e.key === 'ownerNotifications') {
+                    // Immediately refresh the display when orders change
+                    displayNotifications();
+                    displayOrders();
+                    updateStats();
+                }
+            });
+            
+            // Also listen for custom events for same-tab updates
+            window.addEventListener('orderUpdated', function() {
+                displayNotifications();
+                displayOrders();
+                updateStats();
+            });
+        }
+
+        // Show visual indicator for new orders
+        function showNewOrderIndicator() {
+            // Create a temporary flash effect
+            const header = document.querySelector('header');
+            header.style.animation = 'newOrderFlash 0.5s ease-in-out';
+            
+            // Remove animation after it completes
+            setTimeout(() => {
+                header.style.animation = '';
+            }, 500);
+            
+            // Show browser notification if permission is granted
+            if (Notification.permission === 'granted') {
+                new Notification('New Order Received!', {
+                    body: 'A new order has been placed. Check your dashboard.',
+                    icon: '🍽️'
+                });
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const status = this.dataset.status;
+                    filterOrders(status);
+                });
+            });
+        }
+
+        // Filter orders by status
+        function filterOrders(status) {
+            const orderCards = document.querySelectorAll('.order-card');
+            
+            orderCards.forEach(card => {
+                if (status === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    const orderStatus = card.querySelector('.order-status').textContent.toLowerCase();
+                    card.style.display = orderStatus === status ? 'block' : 'none';
+                }
+            });
+        }
+
+        // Initialize dashboard
+        init();
+    </script>
+</body>
+</html>
